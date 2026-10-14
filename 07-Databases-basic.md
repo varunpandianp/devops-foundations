@@ -886,3 +886,580 @@ Try these in a disposable local database or a lab environment.
 - Database security and DevOps operational best practices.
 
 **DevOps relevance:** Databases are essential to deploying applications, configuring environment variables and secrets, connecting containers to database services, managing access, troubleshooting network connections, and building reliable production systems.
+
+
+# MongoDB Fundamentals — DevOps Learning Notes
+
+## 1. What Is MongoDB?
+
+MongoDB is a NoSQL document-oriented database management system used to store, retrieve, and manage data.
+
+Unlike relational databases such as MySQL, which organize data primarily into tables, MongoDB stores data as documents inside collections.
+
+**Key points:**
+- Type: NoSQL document database
+- Query language: MongoDB Query Language (MQL)
+- Document storage format: BSON
+- Default port: `27017`
+- Common use cases: Web applications, APIs, product catalogs, user profiles, and event data
+
+## 2. SQL vs. NoSQL
+
+### SQL databases
+
+SQL databases commonly organize data into tables, rows, and columns.
+
+Examples:
+- MySQL
+- PostgreSQL
+- Microsoft SQL Server
+- Oracle Database
+
+### NoSQL databases
+
+NoSQL databases use different data models, including documents, key-value pairs, wide-column records, and graphs.
+
+Examples:
+- MongoDB — document database
+- Redis — key-value database
+- Cassandra — wide-column database
+- Neo4j — graph database
+
+| SQL database | MongoDB |
+|---|---|
+| Table | Collection |
+| Row | Document |
+| Column | Field |
+| SQL | MongoDB Query Language (MQL) |
+| Relational model | Document model |
+| Commonly fixed table schema | Flexible document structure, with optional schema validation |
+
+## 3. MongoDB Architecture
+
+```text
+MongoDB Deployment
+       |
+       |-- Database: company
+       |       |
+       |       |-- Collection: employees
+       |       |       |
+       |       |       |-- Document 1
+       |       |       |-- Document 2
+       |       |
+       |       |-- Collection: products
+       |
+       |-- Database: ecommerce
+               |
+               |-- Collection: orders
+```
+
+### Important terminology
+
+- **Deployment:** A running MongoDB environment.
+- **Database:** Contains collections.
+- **Collection:** Groups related documents.
+- **Document:** A record containing fields and values.
+- **Field:** A named attribute inside a document.
+- **`_id`:** The unique identifier field required for each document; MongoDB commonly generates an `ObjectId` automatically.
+
+## 4. MongoDB Document Example
+
+A document in an `employees` collection:
+
+```javascript
+{
+  _id: ObjectId("507f1f77bcf86cd799439011"),
+  name: "Arun",
+  role: "DevOps Engineer",
+  experience: 2,
+  skills: ["Linux", "Docker", "AWS"],
+  active: true
+}
+```
+
+This document contains:
+- `name`: String
+- `role`: String
+- `experience`: Number
+- `skills`: Array
+- `active`: Boolean
+- `_id`: ObjectId
+
+MongoDB documents support nested objects and arrays. BSON also supports data types such as dates and binary data.
+
+## 5. What Is BSON?
+
+BSON means Binary JSON.
+
+MongoDB stores documents using BSON, a binary-encoded document format.
+
+JSON-like example:
+
+```json
+{
+  "name": "Arun",
+  "role": "DevOps Engineer",
+  "experience": 2
+}
+```
+
+**Remember:**
+- JSON is a human-readable data representation.
+- BSON is MongoDB's binary document storage format.
+- MQL is used to query and manipulate MongoDB documents.
+- JavaScript is commonly used in the MongoDB shell, but MongoDB applications can use Python, Java, Node.js, Go, and other supported languages.
+
+## 6. MongoDB Installation and Services
+
+On Linux, installation commands depend on your distribution and the official MongoDB package repository configured on the machine.
+
+On a system where the service is named `mongod`, common administration commands are:
+
+```bash
+# Check MongoDB service status
+sudo systemctl status mongod
+
+# Start MongoDB
+sudo systemctl start mongod
+
+# Stop MongoDB
+sudo systemctl stop mongod
+
+# Restart MongoDB
+sudo systemctl restart mongod
+
+# Enable MongoDB at boot
+sudo systemctl enable mongod
+```
+
+These commands assume MongoDB is installed as a systemd service named `mongod`.
+
+Check the installed version:
+
+```bash
+mongod --version
+mongosh --version
+```
+
+- `mongod`: MongoDB database server.
+- `mongosh`: MongoDB interactive shell/client.
+
+## 7. Connect to MongoDB
+
+### Connect to a local MongoDB server
+
+```bash
+mongosh
+```
+
+### Connect to a specific host and port
+
+```bash
+mongosh "mongodb://127.0.0.1:27017"
+```
+
+### Connect using authentication
+
+```bash
+mongosh "mongodb://dbuser@localhost:27017/company?authSource=admin" --password
+```
+
+The client prompts for the password. Use the appropriate authentication database for your account.
+
+For a remote database:
+
+```bash
+mongosh "mongodb://dbuser@192.168.1.20:27017/company?authSource=admin" --password
+```
+
+Replace the example IP, username, and database with your actual values. The server must permit network access, and authentication and firewall rules must be configured correctly.
+
+## 8. Basic MongoDB Shell Commands
+
+Run these commands inside `mongosh`.
+
+### Show databases
+
+```javascript
+show dbs
+```
+
+### Create or switch to a database
+
+```javascript
+use company
+```
+
+MongoDB creates the database when data is first stored in it, rather than necessarily creating it immediately after `use`.
+
+### Show the current database
+
+```javascript
+db
+```
+
+### Show collections
+
+```javascript
+show collections
+```
+
+### Create a collection
+
+```javascript
+db.createCollection("employees")
+```
+
+### Drop a collection
+
+```javascript
+db.employees.drop()
+```
+
+### Drop the current database
+
+```javascript
+db.dropDatabase()
+```
+
+**Warning:** Dropping a collection or database deletes data. Only run these commands in the intended environment after verifying the target.
+
+## 9. CRUD Operations in MongoDB
+
+CRUD means Create, Read, Update, and Delete.
+
+### A. Create — Insert documents
+
+Insert one document:
+
+```javascript
+db.employees.insertOne({
+  name: "Arun",
+  role: "DevOps Engineer",
+  experience: 2
+})
+```
+
+Insert multiple documents:
+
+```javascript
+db.employees.insertMany([
+  {
+    name: "Priya",
+    role: "Developer",
+    experience: 3
+  },
+  {
+    name: "Ravi",
+    role: "Tester",
+    experience: 1
+  }
+])
+```
+
+### B. Read — Find documents
+
+Retrieve all documents:
+
+```javascript
+db.employees.find()
+```
+
+Find one document:
+
+```javascript
+db.employees.findOne({ name: "Arun" })
+```
+
+Filter by role:
+
+```javascript
+db.employees.find({ role: "Developer" })
+```
+
+Filter by a numeric condition:
+
+```javascript
+db.employees.find({ experience: { $gt: 1 } })
+```
+
+Here, `$gt` means greater than.
+
+Other useful comparison operators:
+- `$eq`: Equal
+- `$ne`: Not equal
+- `$gt`: Greater than
+- `$gte`: Greater than or equal
+- `$lt`: Less than
+- `$lte`: Less than or equal
+- `$in`: Matches any value in a specified list
+
+Select specific fields:
+
+```javascript
+db.employees.find(
+  {},
+  { name: 1, role: 1, _id: 0 }
+)
+```
+
+Sort by experience:
+
+```javascript
+db.employees.find().sort({ experience: -1 })
+```
+
+- `1`: Ascending
+- `-1`: Descending
+
+Limit the result:
+
+```javascript
+db.employees.find().limit(5)
+```
+
+Count documents:
+
+```javascript
+db.employees.countDocuments()
+```
+
+### C. Update — Modify documents
+
+Update one document:
+
+```javascript
+db.employees.updateOne(
+  { name: "Arun" },
+  { $set: { experience: 3 } }
+)
+```
+
+Update multiple documents:
+
+```javascript
+db.employees.updateMany(
+  { role: "Developer" },
+  { $set: { active: true } }
+)
+```
+
+`$set` changes the specified fields without replacing the entire document.
+
+### D. Delete — Remove documents
+
+Delete one document:
+
+```javascript
+db.employees.deleteOne({ name: "Arun" })
+```
+
+Delete multiple matching documents:
+
+```javascript
+db.employees.deleteMany({ active: false })
+```
+
+Delete all documents from a collection:
+
+```javascript
+db.employees.deleteMany({})
+```
+
+This removes the documents but keeps the collection.
+
+## 10. MongoDB Data Types
+
+Common BSON data types include:
+
+| Type | Example |
+|---|---|
+| String | `"Arun"` |
+| Integer / Number | `25` |
+| Double | `25.5` |
+| Boolean | `true` |
+| Array | `["Linux", "Docker"]` |
+| Object / Embedded document | `{ city: "Chennai" }` |
+| ObjectId | `ObjectId("...")` |
+| Date | `ISODate("2026-10-14T00:00:00Z")` |
+| Null | `null` |
+
+Example:
+
+```javascript
+db.users.insertOne({
+  name: "Arun",
+  age: 32,
+  active: true,
+  skills: ["Linux", "AWS", "Docker"],
+  address: {
+    city: "Chennai",
+    country: "India"
+  },
+  createdAt: new Date()
+})
+```
+
+## 11. Create a MongoDB User and Grant Permissions
+
+MongoDB supports role-based access control. Users are created with roles that determine what they can do.
+
+### Create an application user
+
+In a properly secured MongoDB deployment, connect as an administrator and switch to the intended authentication database.
+
+For example, create a user authenticated against the `admin` database who has read and write access to the `company` database:
+
+```javascript
+use admin
+
+db.createUser({
+  user: "appuser",
+  pwd: passwordPrompt(),
+  roles: [
+    { role: "readWrite", db: "company" }
+  ]
+})
+```
+
+`passwordPrompt()` prompts for the password in supported `mongosh` versions.
+
+The user is created in the `admin` authentication database, but the assigned `readWrite` role applies to the `company` database.
+
+### Common MongoDB roles
+
+| Role | Purpose |
+|---|---|
+| `read` | Read data in a specified database |
+| `readWrite` | Read and modify data in a specified database |
+| `dbAdmin` | Perform certain database administration tasks |
+| `userAdmin` | Manage users and roles in a database |
+| `readAnyDatabase` | Read data across databases, subject to role scope and deployment rules |
+| `root` | Broad administrative access |
+
+For an ordinary application, prefer `read` or `readWrite` on only the required database. Avoid granting `root` to application accounts.
+
+### Verify users and roles
+
+To inspect users in the current authentication database:
+
+```javascript
+db.getUsers()
+```
+
+To inspect the current user's effective roles:
+
+```javascript
+db.runCommand({ connectionStatus: 1 })
+```
+
+### Connect as the application user
+
+```bash
+mongosh "mongodb://localhost:27017/company?authSource=admin" --username appuser --password
+```
+
+The password is prompted interactively.
+
+## 12. MongoDB Default Port and Networking
+
+MongoDB commonly listens on TCP port `27017`.
+
+Check listening ports on Linux:
+
+```bash
+sudo ss -lntp | grep ':27017'
+```
+
+Check the service:
+
+```bash
+sudo systemctl status mongod
+```
+
+Test a local connection:
+
+```bash
+mongosh "mongodb://127.0.0.1:27017"
+```
+
+### Bind address
+
+MongoDB's configuration file is commonly:
+
+```text
+/etc/mongod.conf
+```
+
+A typical configuration might include:
+
+```yaml
+net:
+  port: 27017
+  bindIp: 127.0.0.1
+```
+
+This allows local loopback connections.
+
+For authorized access from a private network, the bind address must be configured appropriately, and firewall rules must restrict access to trusted clients. Do not expose MongoDB publicly without appropriate security controls.
+
+`0.0.0.0` means listening on all IPv4 interfaces, not that every internet client can automatically connect. Authentication, network routing, and firewalls still matter.
+
+## 13. MongoDB vs. MySQL Query Examples
+
+| Operation | MySQL | MongoDB |
+|---|---|---|
+| Read all employees | `SELECT * FROM employees;` | `db.employees.find({})` |
+| Insert a record | `INSERT INTO employees ...` | `db.employees.insertOne({...})` |
+| Update a record | `UPDATE employees SET ...` | `db.employees.updateOne(...)` |
+| Delete a record | `DELETE FROM employees WHERE ...` | `db.employees.deleteOne(...)` |
+| Table / collection | Table | Collection |
+| Row / document | Row | Document |
+| Column / field | Column | Field |
+
+MongoDB's query API is not simply SQL written in another format. It uses its own operators and document-oriented query model.
+
+## 14. MongoDB in DevOps
+
+MongoDB is relevant to DevOps because engineers may need to:
+
+- Install and configure database services.
+- Connect applications to database endpoints.
+- Manage credentials and access roles.
+- Configure network ports and firewalls.
+- Automate deployments and database setup.
+- Back up and restore databases.
+- Monitor database health and performance.
+- Troubleshoot connection and authentication failures.
+- Run MongoDB in containers or supported cloud services.
+
+### Basic troubleshooting checklist
+
+1. Is the MongoDB service running?
+2. Is the expected port listening?
+3. Is the server bound to the correct network interface?
+4. Can the application server reach the database host and port?
+5. Are the username, password, and authentication database correct?
+6. Does the user have the required roles?
+7. Are firewall and network rules permitting the connection?
+8. Are database backups and recovery procedures available?
+
+## 15. Learning Log
+
+**Topic:** MongoDB Fundamentals
+
+**What I learned:**
+- What MongoDB is and how NoSQL databases differ from relational databases.
+- MongoDB's database, collection, document, field, and `_id` concepts.
+- Difference between JSON, BSON, and MQL.
+- How to connect with `mongosh`.
+- How to create databases and collections.
+- CRUD operations: `insertOne`, `find`, `updateOne`, and `deleteOne`.
+- MongoDB query operators, sorting, projections, and limits.
+- How MongoDB users and role-based permissions work.
+- MongoDB's default port and bind-address configuration.
+- MongoDB networking, authentication, troubleshooting, and DevOps best practices.
+
+**Suggested GitHub filename:** `mongodb-fundamentals.md`
+
+**Next practice task:** Install MongoDB in a lab, create a `company` database, insert employee documents, query and update them, then create a restricted application user and test its permissions.
